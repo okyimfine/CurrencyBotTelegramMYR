@@ -1,0 +1,953 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CurrencyBot Pro Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --info: #06b6d4;
+            
+            /* Light mode colors */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --navbar-bg: rgba(255, 255, 255, 0.95);
+            
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border-color: #334155;
+            --card-bg: #1e293b;
+            --navbar-bg: rgba(30, 41, 59, 0.95);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--navbar-bg);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.users { background: linear-gradient(135deg, var(--info), var(--primary)); }
+        .stat-icon.commands { background: linear-gradient(135deg, var(--warning), #d97706); }
+        .stat-icon.conversions { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+        .stat-icon.alerts { background: linear-gradient(135deg, var(--danger), #dc2626); }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .refresh-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .data-item:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(4px);
+            border-color: var(--primary);
+        }
+
+        .currency-pair, .crypto-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .currency-pair small, .crypto-name small {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .rate-value, .crypto-price {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .price-change {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            margin-left: 0.5rem;
+        }
+
+        .price-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .price-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .system-info {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .info-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .section-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .section-header small {
+            opacity: 0.8;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .navbar h1 {
+                font-size: 1.25rem;
+            }
+
+            .navbar-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-card, .panel {
+                padding: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>
+            <i class="fas fa-chart-line"></i>
+            CurrencyBot Pro Dashboard
+        </h1>
+        <div class="navbar-controls">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="theme-icon"></i>
+                <span id="theme-text">Dark Mode</span>
+            </button>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Live</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="total-users">{{ stats.total_users or 0 }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon commands">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="commands-count">{{ stats.commands_executed or 0 }}</div>
+                <div class="stat-label">Commands Executed</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon conversions">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="conversions-count">{{ stats.total_conversions or 0 }}</div>
+                <div class="stat-label">Currency Conversions</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon alerts">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="alerts-count">{{ stats.alerts_sent or 0 }}</div>
+                <div class="stat-label">Alerts Sent</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-chart-line"></i>
+                        Live Exchange Rates
+                    </h2>
+                    <button class="refresh-btn" onclick="refreshRates()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                <div id="rates-container">
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p>Loading exchange rates...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-coins"></i>
+                        Cryptocurrency Prices
+                    </h2>
+                    <button class="refresh-btn" onclick="refreshCrypto()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                <div id="crypto-container">
+                    <div class="empty-state">
+                        <div class="loading-spinner"></div>
+                        <p>Loading cryptocurrency prices...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="system-info">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <i class="fas fa-cog"></i>
+                    System Information
+                </h2>
+            </div>
+            <div class="info-grid">
+                <div class="info-section">
+                    <h3><i class="fas fa-robot"></i> Bot Status</h3>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="status-badge">
+                            <div class="status-dot"></div>
+                            Online
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Update</span>
+                        <span class="info-value" id="last-update">{{ stats.last_update }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">API Status</span>
+                        <span class="status-badge">
+                            <div class="status-dot"></div>
+                            Connected
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3><i class="fas fa-chart-bar"></i> Usage Statistics</h3>
+                    <div class="info-item">
+                        <span class="info-label">Daily Active Users</span>
+                        <span class="info-value" id="daily-users">{{ stats.daily_active_users or 0 }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Supported Currencies</span>
+                        <span class="info-value">{{ stats.supported_currencies or 169 }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Crypto Assets</span>
+                        <span class="info-value">{{ stats.crypto_currencies or 30 }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">API Sources</span>
+                        <span class="info-value">100+</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme management
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+                themeText.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (savedTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Light Mode';
+            }
+        });
+
+        function refreshRates() {
+            const container = document.getElementById('rates-container');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading comprehensive exchange rates...</p>
+                </div>
+            `;
+            
+            fetch('/api/rates')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.rates) {
+                        const currencyInfo = {
+                            'EUR': { flag: '🇪🇺', name: 'Euro' },
+                            'GBP': { flag: '🇬🇧', name: 'British Pound' },
+                            'JPY': { flag: '🇯🇵', name: 'Japanese Yen' },
+                            'AUD': { flag: '🇦🇺', name: 'Australian Dollar' },
+                            'CAD': { flag: '🇨🇦', name: 'Canadian Dollar' },
+                            'CHF': { flag: '🇨🇭', name: 'Swiss Franc' },
+                            'CNY': { flag: '🇨🇳', name: 'Chinese Yuan' },
+                            'INR': { flag: '🇮🇳', name: 'Indian Rupee' },
+                            'KRW': { flag: '🇰🇷', name: 'South Korean Won' },
+                            'SGD': { flag: '🇸🇬', name: 'Singapore Dollar' },
+                            'HKD': { flag: '🇭🇰', name: 'Hong Kong Dollar' },
+                            'THB': { flag: '🇹🇭', name: 'Thai Baht' },
+                            'MYR': { flag: '🇲🇾', name: 'Malaysian Ringgit' },
+                            'IDR': { flag: '🇮🇩', name: 'Indonesian Rupiah' },
+                            'PHP': { flag: '🇵🇭', name: 'Philippine Peso' },
+                            'VND': { flag: '🇻🇳', name: 'Vietnamese Dong' },
+                            'TWD': { flag: '🇹🇼', name: 'Taiwan Dollar' },
+                            'SEK': { flag: '🇸🇪', name: 'Swedish Krona' },
+                            'NOK': { flag: '🇳🇴', name: 'Norwegian Krone' },
+                            'DKK': { flag: '🇩🇰', name: 'Danish Krone' },
+                            'PLN': { flag: '🇵🇱', name: 'Polish Zloty' },
+                            'CZK': { flag: '🇨🇿', name: 'Czech Koruna' },
+                            'HUF': { flag: '🇭🇺', name: 'Hungarian Forint' },
+                            'RON': { flag: '🇷🇴', name: 'Romanian Leu' },
+                            'TRY': { flag: '🇹🇷', name: 'Turkish Lira' },
+                            'RUB': { flag: '🇷🇺', name: 'Russian Ruble' },
+                            'BRL': { flag: '🇧🇷', name: 'Brazilian Real' },
+                            'MXN': { flag: '🇲🇽', name: 'Mexican Peso' },
+                            'ARS': { flag: '🇦🇷', name: 'Argentine Peso' },
+                            'CLP': { flag: '🇨🇱', name: 'Chilean Peso' },
+                            'COP': { flag: '🇨🇴', name: 'Colombian Peso' },
+                            'PEN': { flag: '🇵🇪', name: 'Peruvian Sol' },
+                            'ZAR': { flag: '🇿🇦', name: 'South African Rand' },
+                            'EGP': { flag: '🇪🇬', name: 'Egyptian Pound' },
+                            'NGN': { flag: '🇳🇬', name: 'Nigerian Naira' },
+                            'SAR': { flag: '🇸🇦', name: 'Saudi Riyal' },
+                            'AED': { flag: '🇦🇪', name: 'UAE Dirham' },
+                            'ILS': { flag: '🇮🇱', name: 'Israeli Shekel' },
+                            'KES': { flag: '🇰🇪', name: 'Kenyan Shilling' },
+                            'GHS': { flag: '🇬🇭', name: 'Ghanaian Cedi' },
+                            'MAD': { flag: '🇲🇦', name: 'Moroccan Dirham' },
+                            'TND': { flag: '🇹🇳', name: 'Tunisian Dinar' },
+                            'DZD': { flag: '🇩🇿', name: 'Algerian Dinar' },
+                            'XAU': { flag: '🥇', name: 'Gold (Troy Oz)' },
+                            'XAG': { flag: '🥈', name: 'Silver (Troy Oz)' },
+                            'XPD': { flag: '⚪', name: 'Palladium (Troy Oz)' },
+                            'XPT': { flag: '⚫', name: 'Platinum (Troy Oz)' }
+                        };
+
+                        const currencyGroups = [
+                            {
+                                title: '🌎 Major Currencies',
+                                currencies: ['EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF']
+                            },
+                            {
+                                title: '🌏 Asia-Pacific',
+                                currencies: ['CNY', 'INR', 'KRW', 'SGD', 'HKD', 'THB', 'MYR', 'IDR', 'PHP', 'VND', 'TWD']
+                            },
+                            {
+                                title: '🇪🇺 Europe',
+                                currencies: ['SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'TRY', 'RUB']
+                            },
+                            {
+                                title: '🌎 Americas',
+                                currencies: ['BRL', 'MXN', 'ARS', 'CLP', 'COP', 'PEN']
+                            },
+                            {
+                                title: '🌍 Africa & Middle East',
+                                currencies: ['ZAR', 'EGP', 'NGN', 'SAR', 'AED', 'ILS', 'KES', 'GHS', 'MAD', 'TND', 'DZD']
+                            },
+                            {
+                                title: '💎 Precious Metals',
+                                currencies: ['XAU', 'XAG', 'XPD', 'XPT']
+                            }
+                        ];
+                        
+                        let html = '';
+                        let totalCurrencies = 0;
+                        
+                        currencyGroups.forEach(group => {
+                            let groupHtml = `<div style="margin-bottom: 1.5rem;"><h4 style="color: var(--primary); margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 700;">${group.title}</h4>`;
+                            let groupCount = 0;
+                            
+                            group.currencies.forEach(currencyCode => {
+                                if (data.rates[currencyCode] && currencyInfo[currencyCode]) {
+                                    const rate = data.rates[currencyCode];
+                                    const currency = currencyInfo[currencyCode];
+                                    groupCount++;
+                                    totalCurrencies++;
+                                    
+                                    let formattedRate;
+                                    if (['XAU', 'XAG', 'XPD', 'XPT'].includes(currencyCode)) {
+                                        formattedRate = rate.toFixed(6);
+                                    } else if (['JPY', 'KRW', 'IDR', 'VND'].includes(currencyCode)) {
+                                        formattedRate = rate.toFixed(2);
+                                    } else {
+                                        formattedRate = rate.toFixed(4);
+                                    }
+                                    
+                                    groupHtml += `
+                                        <div class="data-item" style="margin-bottom: 0.5rem; padding: 0.75rem;">
+                                            <span class="currency-pair">
+                                                ${currency.flag} USD/${currencyCode}
+                                                <small>${currency.name}</small>
+                                            </span>
+                                            <span class="rate-value">${formattedRate}</span>
+                                        </div>
+                                    `;
+                                }
+                            });
+                            
+                            if (groupCount > 0) {
+                                groupHtml += '</div>';
+                                html += groupHtml;
+                            }
+                        });
+                        
+                        const summaryHtml = `
+                            <div class="section-header">
+                                <h3>Live Exchange Rates</h3>
+                                <p>Showing ${totalCurrencies} currencies from ${Object.keys(data.rates).length} total available</p>
+                                <small>Last updated: ${new Date().toLocaleTimeString()}</small>
+                            </div>
+                        `;
+                        
+                        container.innerHTML = summaryHtml + html || '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>No rate data available</p></div>';
+                    } else {
+                        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load exchange rates</p></div>';
+                    }
+                })
+                .catch(error => {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading rates</p></div>';
+                });
+        }
+
+        function refreshCrypto() {
+            const container = document.getElementById('crypto-container');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading comprehensive crypto data...</p>
+                </div>
+            `;
+            
+            fetch('/api/crypto')
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        const cryptoGroups = [
+                            {
+                                title: '🏆 Top Tier',
+                                cryptos: [
+                                    { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin', icon: '₿' },
+                                    { id: 'ethereum', symbol: 'ETH', name: 'Ethereum', icon: '⟠' },
+                                    { id: 'tether', symbol: 'USDT', name: 'Tether', icon: '💵' },
+                                    { id: 'binancecoin', symbol: 'BNB', name: 'BNB', icon: '🅱️' }
+                                ]
+                            },
+                            {
+                                title: '🚀 Major Altcoins',
+                                cryptos: [
+                                    { id: 'solana', symbol: 'SOL', name: 'Solana', icon: '☀️' },
+                                    { id: 'ripple', symbol: 'XRP', name: 'XRP', icon: '💧' },
+                                    { id: 'cardano', symbol: 'ADA', name: 'Cardano', icon: '💎' },
+                                    { id: 'dogecoin', symbol: 'DOGE', name: 'Dogecoin', icon: '🐕' }
+                                ]
+                            },
+                            {
+                                title: '💎 DeFi & Others',
+                                cryptos: [
+                                    { id: 'chainlink', symbol: 'LINK', name: 'Chainlink', icon: '🔗' },
+                                    { id: 'polygon', symbol: 'MATIC', name: 'Polygon', icon: '🟣' },
+                                    { id: 'litecoin', symbol: 'LTC', name: 'Litecoin', icon: '🔵' },
+                                    { id: 'uniswap', symbol: 'UNI', name: 'Uniswap', icon: '🦄' }
+                                ]
+                            }
+                        ];
+                        
+                        let html = '';
+                        let totalCryptos = 0;
+                        
+                        cryptoGroups.forEach(group => {
+                            let groupHtml = `<div style="margin-bottom: 1.5rem;"><h4 style="color: var(--secondary); margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 700;">${group.title}</h4>`;
+                            let groupCount = 0;
+                            
+                            group.cryptos.forEach(crypto => {
+                                if (data[crypto.id] && data[crypto.id].usd) {
+                                    const price = data[crypto.id].usd;
+                                    const change = data[crypto.id].usd_24h_change || 0;
+                                    const changeClass = change >= 0 ? 'positive' : 'negative';
+                                    const changeIcon = change >= 0 ? '📈' : '📉';
+                                    groupCount++;
+                                    totalCryptos++;
+                                    
+                                    let formattedPrice;
+                                    if (price >= 1000) {
+                                        formattedPrice = `$${price.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+                                    } else if (price >= 1) {
+                                        formattedPrice = `$${price.toFixed(2)}`;
+                                    } else if (price >= 0.01) {
+                                        formattedPrice = `$${price.toFixed(4)}`;
+                                    } else {
+                                        formattedPrice = `$${price.toFixed(8)}`;
+                                    }
+                                    
+                                    groupHtml += `
+                                        <div class="data-item" style="margin-bottom: 0.5rem; padding: 0.75rem;">
+                                            <span class="crypto-name">
+                                                ${crypto.icon} ${crypto.symbol}
+                                                <small>${crypto.name}</small>
+                                            </span>
+                                            <div style="text-align: right;">
+                                                <span class="crypto-price">${formattedPrice}</span>
+                                                <span class="price-change ${changeClass}">
+                                                    ${changeIcon} ${change.toFixed(2)}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            });
+                            
+                            if (groupCount > 0) {
+                                groupHtml += '</div>';
+                                html += groupHtml;
+                            }
+                        });
+                        
+                        const summaryHtml = `
+                            <div class="section-header">
+                                <h3>Live Crypto Market</h3>
+                                <p>Tracking ${totalCryptos} cryptocurrencies with real-time prices</p>
+                                <small>Last updated: ${new Date().toLocaleTimeString()}</small>
+                            </div>
+                        `;
+                        
+                        container.innerHTML = summaryHtml + html || '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>No crypto data available</p></div>';
+                    } else {
+                        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load cryptocurrency prices</p></div>';
+                    }
+                })
+                .catch(error => {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading crypto prices</p></div>';
+                });
+        }
+
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-users').textContent = data.total_users || 0;
+                    document.getElementById('commands-count').textContent = data.commands_executed || 0;
+                    document.getElementById('conversions-count').textContent = data.total_conversions || 0;
+                    document.getElementById('alerts-count').textContent = data.alerts_sent || 0;
+                    document.getElementById('daily-users').textContent = data.daily_active_users || 0;
+                    document.getElementById('last-update').textContent = new Date(data.last_update).toLocaleString();
+                });
+        }
+
+        // Initialize data loading
+        refreshRates();
+        refreshCrypto();
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            refreshRates();
+            refreshCrypto();
+            updateStats();
+        }, 30000);
+
+        // Update time every second
+        setInterval(() => {
+            const now = new Date().toLocaleString();
+            document.getElementById('last-update').textContent = now;
+        }, 1000);
+    </script>
+</body>
+</html>
