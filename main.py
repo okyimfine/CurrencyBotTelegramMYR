@@ -340,12 +340,12 @@ async def start(update: Update, context):
 🎉 **Welcome {user_name} to CurrencyBot Pro!** 🎉
 
 🚀 **TRUSTED CURRENCY FEATURES:**
-• ✅ Top 5 Most Accurate APIs (2025)
-• 🎯 ExchangeRate-API (★★★★☆)
-• 🏆 Open Exchange Rates (★★★★★)
-• 💎 CurrencyFreaks (★★★★☆)
-• 📊 ForexRateAPI (★★★★☆)
-• 🔒 Fixer.io by APILayer (★★★★☆)
+• ✅ Top 5 Most Accurate Currency(2025)
+• 🎯 ExchangeRate - (★★★★☆)
+• 🏆 Open Exchange Rates - (★★★★★)
+• 💎 CurrencyFreaks - (★★★★☆)
+• 📊 ForexRateAPI - (★★★★☆)
+• 🔒 Fixer.io - (★★★★☆)
 
 **💱 CURRENCY FEATURES:**
 • {len(SUPPORTED_CURRENCIES)} World currencies
