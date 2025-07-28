@@ -617,12 +617,12 @@ async def help_command(update: Update, context):
 🤖 **CurrencyBot Pro - Trusted Currency Guide**
 
 **🚀 TRUSTED API FEATURES:**
-• ✅ Top 5 Most Accurate APIs (2025)
-• 🎯 ExchangeRate-API (★★★★☆)
-• 🏆 Open Exchange Rates (★★★★★) 
-• 💎 CurrencyFreaks (★★★★☆)
-• 📊 ForexRateAPI (★★★★☆)
-• 🔒 Fixer.io by APILayer (★★★★☆)
+• ✅ Top 5 Most Accurate -  (2025)
+• 🎯 ExchangeRate - (★★★★☆)
+• 🏆 Open Exchange Rates  - (★★★★★) 
+• 💎 CurrencyFreaks  - (★★★★☆)
+• 📊 ForexRateAPI -  (★★★★☆)
+• 🔒 Fixer.io by APILayer  - (★★★★☆)
 
 **💱 CURRENCY COMMANDS:**
 /currency [CODE] - Exchange rates
