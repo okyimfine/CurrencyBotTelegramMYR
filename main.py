@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 
 # Bot configuration
-BOT_TOKEN = '7800653916:AAGNQDpd_r4KVhCkr61F55ZODa3_Ad3NHA8'
+BOT_TOKEN = '7800653916:AAEbipLwXqwW7OuuKeaRHVGG1SjHagxnwjc'
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 FLASK_SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
 
